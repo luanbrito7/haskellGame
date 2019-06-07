@@ -3,26 +3,27 @@ module Index where
 import Control.Concurrent
 import Control.Concurrent.MVar
 
--- horizontal :: () -> [String]
--- horizontal _ = ["|", " ", " ", " ", " ", " ", " ", " ", " ", " ", ]
-
--- intializeMap :: Int -> Int -> [[String]] -> [[String]]
--- intializeMap 0 0 map = map
--- intializeMap i 10 map = intializeMap i + 1 0 map
-
-
 main = do
-    printLine $ topBoundary 15 []
-    printLine $ topBoundary 15 []
-    printLine $ regularSpace 15 15 []
-    printLine $ regularSpace 15 15 []
-    printLine $ regularSpace 15 15 []
-    printLine $ middleSpace 15 15 []
-    printLine $ regularSpace 15 15 []
-    printLine $ regularSpace 15 15 []
-    printLine $ regularSpace 15 15 []
-    printLine $ bottomBoundary 15 15 []
-    -- map <- newEmptyMVar
+    -- printLine $ topBoundary 15 []
+    -- printLine $ regularSpace 15 15 []
+    -- printLine $ regularSpace 15 15 []
+    -- printLine $ regularSpace 15 15 []
+    -- printLine $ middleSpace 15 15 []
+    -- printLine $ regularSpace 15 15 []
+    -- printLine $ regularSpace 15 15 []
+    -- printLine $ regularSpace 15 15 []
+    -- printLine $ bottomBoundary 15 15 []
+    mapa <- newEmptyMVar
+    putMVar mapa $ generateMap 16 0 []
+    linha <- takeMVar mapa
+    mapM_ printLine $ linha
+
+generateMap :: Int -> Int -> [[Char]] -> [[Char]]
+generateMap max num mapa
+    | num == 0           = [topBoundary max []] ++ (generateMap max (num+1) mapa) 
+    | num == (div max 2) = [middleSpace max max []] ++ (generateMap max (num+1) mapa) 
+    | num == max         = mapa ++ [bottomBoundary max max []]
+    | otherwise          = [regularSpace max max []] ++ (generateMap max (num+1) mapa)
 
 topBoundary :: Int -> [Char] -> [Char]
 topBoundary 0 mapa = mapa ++ "\n"
@@ -46,5 +47,5 @@ regularSpace num max mapa
     | num == max = regularSpace (num-1) max (mapa ++ "|")
     | otherwise  = regularSpace (num-1) max (mapa ++ " ")
 
-printLine :: [Char] -> IO () -- Essa função vai receber cada linha do MVAR recursivamente e ir printando.
+printLine :: [Char] -> IO () -- Essa função vai receber cada linha do MVAR e ir printando.
 printLine str = putStrLn (str)
