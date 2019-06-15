@@ -4,19 +4,23 @@ import Control.Concurrent
 import Control.Concurrent.MVar
 
 main = do
-    -- printLine $ topBoundary 15 []
-    -- printLine $ regularSpace 15 15 []
-    -- printLine $ regularSpace 15 15 []
-    -- printLine $ regularSpace 15 15 []
-    -- printLine $ middleSpace 15 15 []
-    -- printLine $ regularSpace 15 15 []
-    -- printLine $ regularSpace 15 15 []
-    -- printLine $ regularSpace 15 15 []
-    -- printLine $ bottomBoundary 15 15 []
     mapa <- newEmptyMVar
+    bullets <- newEmptyMVar
+    players <- newEmptyMVar
     putMVar mapa $ generateMap 16 0 []
     linha <- takeMVar mapa
+    let p1 = newPlayer 3 2 "p1"
+    let p2 = newPlayer 4 0 "p2"
+    let b1 = newBullet 1 2
+    putMVar players [p1, p2]
+    putMVar bullets [b1]
     mapM_ printLine $ linha
+
+newBullet :: Int -> Int -> (Int, Int)
+newBullet x y = (x,y)
+
+newPlayer :: Int -> Int -> String -> (Int, Int, String)
+newPlayer x y name = (x,y,name)
 
 generateMap :: Int -> Int -> [[Char]] -> [[Char]]
 generateMap max num mapa
