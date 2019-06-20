@@ -2,19 +2,33 @@ module Index where
 
 import Control.Concurrent
 import Control.Concurrent.MVar
+import Data.List
 
 main = do
     mapa <- newEmptyMVar
     bullets <- newEmptyMVar
     players <- newEmptyMVar
     putMVar mapa $ generateMap 16 0 []
-    linha <- takeMVar mapa
+    field <- takeMVar mapa
     let p1 = newPlayer 3 2 "p1"
     let p2 = newPlayer 4 0 "p2"
-    let b1 = newBullet 1 2
+    let b1 = newBullet 5 5
     putMVar players [p1, p2]
     putMVar bullets [b1]
-    mapM_ printLine $ linha
+    mapM_ printLine $ field
+    putMVar mapa field
+    field <- takeMVar mapa
+    mapM_ printLine $ setPositionMap field b1 '*'
+    return ()
+
+getPosition :: [[Char]] -> (Int, Int) -> Char
+getPosition field (line, col) = (field !! line) !! (col)
+
+setPositionMap :: [[Char]] -> (Int, Int) -> Char -> [[Char]]
+setPositionMap field (line, col) newValue = take line field ++ [setPositionList (field !! line) col newValue] ++ drop (line+1) field
+
+setPositionList :: [Char] -> Int -> Char -> [Char]
+setPositionList line index newElement = take index line ++ [newElement] ++ drop (index + 1) line
 
 newBullet :: Int -> Int -> (Int, Int)
 newBullet x y = (x,y)
