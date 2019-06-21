@@ -18,9 +18,18 @@ main = do
     mapM_ printLine $ field
     putMVar mapa field
     field <- takeMVar mapa
-    mapM_ printLine $ setPositionMap field b1 '*' 
+    putMVar mapa (setPositionMap field b1 '*') 
+    field <- takeMVar mapa
     mapM_ printLine $ setPositionPlayer field p1
+    print $ show $ isPlayerDead [b1] p1
     return ()
+
+isPlayerDead :: [(Int, Int)] -> (Int, Int, Char) -> Bool
+isPlayerDead [] (playerLine, playerCol, name)          = False
+isPlayerDead ((x,y):tail) (playerLine, playerCol, name) = do
+    if x == playerLine && y == playerCol then
+        True
+        else isPlayerDead tail (playerLine, playerCol, name)
 
 getPosition :: [[Char]] -> (Int, Int) -> Char
 getPosition field (line, col) = (field !! line) !! (col)
