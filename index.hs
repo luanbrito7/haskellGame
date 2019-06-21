@@ -24,8 +24,14 @@ main = do
     print $ show $ isPlayerDead [b1] p1
     return ()
 
+isMapLimits :: Char -> Bool
+isMapLimits character = do
+    if character == '|' || character == '_' then
+        True
+        else False
+
 isPlayerDead :: [(Int, Int)] -> (Int, Int, Char) -> Bool
-isPlayerDead [] (playerLine, playerCol, name)          = False
+isPlayerDead [] (playerLine, playerCol, name)           = False
 isPlayerDead ((x,y):tail) (playerLine, playerCol, name) = do
     if x == playerLine && y == playerCol then
         True
