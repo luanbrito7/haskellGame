@@ -39,28 +39,37 @@ updateState mapa bulletsDown bulletsUp players = do
 updateBullets :: [[Char]] -> [(Int, Int)] -> String -> [(Int, Int)] -> [(Int, Int)]
 updateBullets mapa [] direction updatedBullets     = updatedBullets
 updateBullets mapa ((x,y):xs) direction updatedBullets = do
+    let posDown = getPosition mapa (x+1, y)
+    let posUp = getPosition mapa (x-1, y)
     if direction == "down" then do
-        if isMapLimits $ getPosition mapa (x+1, y) then
+        if isMapLimits posDown then
             updateBullets mapa xs direction updatedBullets
+            else if '-' == posDown then
+                updateBullets mapa xs direction (updatedBullets ++ [(x+2, y)])
+
             else do
                 updateBullets mapa xs direction (updatedBullets ++ [(x+1, y)])
     else do
-        if isMapLimits $ getPosition mapa (x-1, y) then
+        if isMapLimits posUp then
             updateBullets mapa xs direction updatedBullets
+            else if '-' == posUp then
+                updateBullets mapa xs direction (updatedBullets ++ [(x-2, y)])
             else do
                 updateBullets mapa xs direction (updatedBullets ++ [(x-1, y)])
 
 bulletsAdvance :: [[Char]] -> [(Int, Int)] -> String -> [[Char]]
 bulletsAdvance field [] direction = field
 bulletsAdvance field ((x,y):xs) direction = do
+    let posDown = getPosition field (x+1, y)
+    let posUp = getPosition field (x-1, y)
     if direction == "down" then do
         let mp1 = setPositionMap field (x,y) ' '
-        if isMapLimits $ getPosition mp1 (x+1, y) then
+        if isMapLimits posDown || (posDown == '-') then
             bulletsAdvance mp1 xs direction
             else bulletsAdvance (setPositionMap mp1 (x+1,y) '*') xs direction
         else do
             let mp1 = setPositionMap field (x,y) ' '
-            if isMapLimits $ getPosition mp1 (x-1, y) then
+            if isMapLimits posUp || (posUp == '-') then
                 bulletsAdvance mp1 xs direction
             else bulletsAdvance (setPositionMap mp1 (x-1, y) '*') xs direction
 
