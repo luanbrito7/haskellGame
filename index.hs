@@ -6,23 +6,63 @@ import Data.List
 
 main = do
     mapa <- newEmptyMVar
-    bullets <- newEmptyMVar
+    bulletsTop <- newEmptyMVar
+    bulletsBottom <- newEmptyMVar
     players <- newEmptyMVar
     putMVar mapa $ generateMap 16 0 []
-    field <- takeMVar mapa
     let p1 = newPlayer 3 2 '1'
     let p2 = newPlayer 4 0 '2'
-    let b1 = newBullet 5 5
+    let b1 = newBullet 1 2
+    let b2 = newBullet 1 5
+    let b3 = newBullet 15 4
     putMVar players [p1, p2]
-    putMVar bullets [b1]
-    mapM_ printLine $ field
-    putMVar mapa field
-    field <- takeMVar mapa
-    putMVar mapa (setPositionMap field b1 '*') 
-    field <- takeMVar mapa
-    mapM_ printLine $ setPositionPlayer field p1
-    print $ show $ isPlayerDead [b1] p1
+    putMVar bulletsTop [b1, b2]
+    putMVar bulletsBottom [b3]
+    forkIO (updateState mapa bulletsTop bulletsBottom players)
     return ()
+
+updateState :: MVar [[Char]] -> MVar [(Int, Int)] -> MVar [(Int, Int)] -> MVar [(Int, Int, Char)] -> IO ()
+updateState mapa bulletsDown bulletsUp players = do
+    field <- takeMVar mapa
+    bd <- takeMVar bulletsDown
+    bu <- takeMVar bulletsUp
+    putMVar mapa $ bulletsAdvance field bd "down"
+    field <- takeMVar mapa
+    putMVar mapa $ bulletsAdvance field bu "up"
+    field <- readMVar mapa
+    putMVar bulletsUp $ updateBullets field bu "up" []
+    putMVar bulletsDown $ updateBullets field bd "down" []
+    mapM_ printLine $ field
+    threadDelay 900000
+    updateState mapa bulletsDown bulletsUp players
+
+updateBullets :: [[Char]] -> [(Int, Int)] -> String -> [(Int, Int)] -> [(Int, Int)]
+updateBullets mapa [] direction updatedBullets     = updatedBullets
+updateBullets mapa ((x,y):xs) direction updatedBullets = do
+    if direction == "down" then do
+        if isMapLimits $ getPosition mapa (x+1, y) then
+            updateBullets mapa xs direction updatedBullets
+            else do
+                updateBullets mapa xs direction (updatedBullets ++ [(x+1, y)])
+    else do
+        if isMapLimits $ getPosition mapa (x-1, y) then
+            updateBullets mapa xs direction updatedBullets
+            else do
+                updateBullets mapa xs direction (updatedBullets ++ [(x-1, y)])
+
+bulletsAdvance :: [[Char]] -> [(Int, Int)] -> String -> [[Char]]
+bulletsAdvance field [] direction = field
+bulletsAdvance field ((x,y):xs) direction = do
+    if direction == "down" then do
+        let mp1 = setPositionMap field (x,y) ' '
+        if isMapLimits $ getPosition mp1 (x+1, y) then
+            bulletsAdvance mp1 xs direction
+            else bulletsAdvance (setPositionMap mp1 (x+1,y) '*') xs direction
+        else do
+            let mp1 = setPositionMap field (x,y) ' '
+            if isMapLimits $ getPosition mp1 (x-1, y) then
+                bulletsAdvance mp1 xs direction
+            else bulletsAdvance (setPositionMap mp1 (x-1, y) '*') xs direction
 
 isMapLimits :: Char -> Bool
 isMapLimits character = do
