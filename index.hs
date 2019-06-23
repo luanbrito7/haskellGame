@@ -1,6 +1,7 @@
 module Index where
 
 import Control.Concurrent
+import Control.Monad (forever)
 import Control.Concurrent.MVar
 import Data.List
 
@@ -19,6 +20,22 @@ main = do
     putMVar bulletsTop [b1, b2]
     putMVar bulletsBottom [b3]
     forkIO (updateState mapa bulletsTop bulletsBottom players)
+    -- line <- getChar
+    -- print line
+    -- line <- getChar
+    -- print line
+    -- line <- getChar
+    -- print line
+    -- line <- getChar
+    -- print line
+    -- forkIO (forever $ do
+    --         c <- getChar
+    --         putStrLn $ [c] ++ " from thread 1"
+    --     )
+    -- forkIO (forever $ do
+    --         a <- getChar
+    --         putStrLn $ [a] ++ " from thread 2"
+    --     ) 
     return ()
 
 updateState :: MVar [[Char]] -> MVar [(Int, Int)] -> MVar [(Int, Int)] -> MVar [(Int, Int, Char)] -> IO ()
@@ -33,7 +50,7 @@ updateState mapa bulletsDown bulletsUp players = do
     putMVar bulletsUp $ updateBullets field bu "up" []
     putMVar bulletsDown $ updateBullets field bd "down" []
     mapM_ printLine $ field
-    threadDelay 900000
+    threadDelay 300000
     updateState mapa bulletsDown bulletsUp players
 
 updateBullets :: [[Char]] -> [(Int, Int)] -> String -> [(Int, Int)] -> [(Int, Int)]
