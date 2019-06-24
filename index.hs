@@ -20,22 +20,10 @@ main = do
     putMVar bulletsTop [b1, b2]
     putMVar bulletsBottom [b3]
     forkIO (updateState mapa bulletsTop bulletsBottom players)
-    -- line <- getChar
-    -- print line
-    -- line <- getChar
-    -- print line
-    -- line <- getChar
-    -- print line
-    -- line <- getChar
-    -- print line
-    -- forkIO (forever $ do
-    --         c <- getChar
-    --         putStrLn $ [c] ++ " from thread 1"
-    --     )
-    -- forkIO (forever $ do
-    --         a <- getChar
-    --         putStrLn $ [a] ++ " from thread 2"
-    --     ) 
+    forkIO (forever $ do
+            c <- getChar
+            putStrLn $ [c] ++ " from thread 1"
+        ) 
     return ()
 
 updateState :: MVar [[Char]] -> MVar [(Int, Int)] -> MVar [(Int, Int)] -> MVar [(Int, Int, Char)] -> IO ()
