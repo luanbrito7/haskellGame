@@ -27,13 +27,13 @@ bulletsDismiss game = game {
 render :: MyGame -> Picture
 render game = pictures [
     bulletsUp,
-    bulletsDown
+    bulletsDown,
     player (0, 200) p1Color,
     player (0, -200) p2Color
                        ]
     where
-        bulletsDown = [ uncurry translate (bullet) $ color ballColor $ circleSolid 15 | bullet <- bulletsDownLoc game ]
-        bulletsUp = [ uncurry translate (bullet) $ color ballColor $ circleSolid 15 | bullet <- bulletsTopLoc game ]
+        bulletsDown = pictures [ uncurry translate (bullet) $ color ballColor $ circleSolid 15 | bullet <- bulletsDownLoc game ]
+        bulletsUp = pictures [ uncurry translate (bullet) $ color ballColor $ circleSolid 15 | bullet <- bulletsTopLoc game ]
 
 moveBullets :: Float -> MyGame -> MyGame
 moveBullets sec state = state {
@@ -49,9 +49,9 @@ player (x,y) c = translate x y $ color c $ rectangleSolid 20 10
 
 initialState :: MyGame
 initialState = Game
-  { bulletsDownLoc = [(-40, -200), (30, 200)]
-  , bulletsTopLoc = [(-40, -200), (30, 200)]
-  , bulletsVel  = 2
+  { bulletsDownLoc = [(-40, 180), (30, 180)]
+  , bulletsTopLoc = [(-40, -180), (30, -180)]
+  , bulletsVel  = 10
   , p1Position = (0, -200)
   , p2Position = (0, 200)
   }
