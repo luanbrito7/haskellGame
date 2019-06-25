@@ -6,7 +6,7 @@ main :: IO ()
 main = play window background fps initialState render handleKeys update
     where
         update :: Float -> MyGame -> MyGame
-        update secs = bulletsDismiss . moveBullets secs
+        update secs = checkEnd . bulletsDismiss . moveBullets secs
         window = InWindow "Game" (400, 400) (0, 0) 
         background = black
 
@@ -20,13 +20,39 @@ handleKeys (EventKey (Char 'a') _ _ _) game = game { p1Position = (xP1 - 10,yP1)
 handleKeys (EventKey (Char 'd') _ _ _) game = game { p1Position = (xP1 + 10,yP1) }
   where
     (xP1,yP1) = p1Position game
+handleKeys (EventKey (Char 'w') _ _ _) game = game { p1Position = (xP1,yP1 + 10) }
+  where
+    (xP1,yP1) = p1Position game
+handleKeys (EventKey (Char 's') _ _ _) game = game { p1Position = (xP1 + 10,yP1 - 10) }
+  where
+    (xP1,yP1) = p1Position game
 handleKeys (EventKey (Char 'j') _ _ _) game = game { p2Position = (xP2 - 10,yP2) }
   where
     (xP2,yP2) = p2Position game
 handleKeys (EventKey (Char 'l') _ _ _) game = game { p2Position = (xP2 + 10,yP2) }
   where
     (xP2,yP2) = p2Position game
+handleKeys (EventKey (Char 'i') _ _ _) game = game { p2Position = (xP2,yP2 + 10) }
+  where
+    (xP2,yP2) = p2Position game
+handleKeys (EventKey (Char 'k') _ _ _) game = game { p2Position = (xP2,yP2 - 10) }
+  where
+    (xP2,yP2) = p2Position game
 handleKeys _ game = game
+
+checkEnd :: MyGame -> MyGame
+checkEnd game = 
+    if not(length (bulletsDownLoc game) == length [ (i,j) | (i,j) <- bulletsDownLoc game, playerCollision (p1Position game) (i,j) 15] && length (bulletsTopLoc game) == length [ (i,j) | (i,j) <- bulletsTopLoc game, playerCollision (p1Position game) (i,j) 15]) then
+      error "P2 WON"
+      else if not(length (bulletsDownLoc game) == length [ (i,j) | (i,j) <- bulletsDownLoc game, playerCollision (p2Position game) (i,j) 15] && length (bulletsTopLoc game) == length [ (i,j) | (i,j) <- bulletsTopLoc game, playerCollision (p2Position game) (i,j) 15]) then
+        error "P1 WON"
+          else game
+
+playerCollision :: (Float, Float) -> (Float, Float) -> Float -> Bool
+playerCollision (px, py) (bx, by) radius = collision
+  where
+    collision = (sqrt ((px - bx)^2 + (py - by)^2)) - radius >= 5
+
 
 wallCollision :: (Float, Float) -> Float -> Bool
 wallCollision (x,y) radius = topCollision || bottomCollision
