@@ -27,6 +27,10 @@ handleKeys (EventKey (Char 'w') _ _ _) game = game { p1Position = (xP1,yP1 + 10)
 handleKeys (EventKey (Char 's') _ _ _) game = game { p1Position = (xP1,yP1 - 10) }
   where
     (xP1,yP1) = p1Position game
+handleKeys (EventKey (Char 'q') _ _ _) game = game { bulletsTopLoc = bulletsTopLoc' ++ [(xP1, yP1 + 10)] }
+  where
+    (xP1,yP1) = p1Position game
+    bulletsTopLoc' = bulletsTopLoc game
 handleKeys (EventKey (Char 'j') _ _ _) game = game { p2Position = (xP2 - 10,yP2) }
   where
     (xP2,yP2) = p2Position game
@@ -39,6 +43,10 @@ handleKeys (EventKey (Char 'i') _ _ _) game = game { p2Position = (xP2,yP2 + 10)
 handleKeys (EventKey (Char 'k') _ _ _) game = game { p2Position = (xP2,yP2 - 10) }
   where
     (xP2,yP2) = p2Position game
+handleKeys (EventKey (Char 'u') _ _ _) game = game { bulletsDownLoc = bulletsDownLoc' ++ [(xP2, yP2 - 10)] }
+  where
+    (xP2,yP2) = p2Position game
+    bulletsDownLoc' = bulletsDownLoc game
 handleKeys _ game = game
 
 checkEnd :: MyGame -> MyGame
