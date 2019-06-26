@@ -1,12 +1,13 @@
 import Graphics.Gloss
 import Graphics.Gloss.Data.ViewPort
 import Graphics.Gloss.Interface.Pure.Game
+import System.Random
 
 main :: IO ()
 main = play window background fps initialState render handleKeys update
     where
         update :: Float -> MyGame -> MyGame
-        update secs = checkEnd . bulletsDismiss . moveBullets secs
+        update secs = generateBullets . checkEnd . bulletsDismiss . moveBullets secs
         window = InWindow "Game" (400, 400) (0, 0) 
         background = black
 
@@ -23,7 +24,7 @@ handleKeys (EventKey (Char 'd') _ _ _) game = game { p1Position = (xP1 + 10,yP1)
 handleKeys (EventKey (Char 'w') _ _ _) game = game { p1Position = (xP1,yP1 + 10) }
   where
     (xP1,yP1) = p1Position game
-handleKeys (EventKey (Char 's') _ _ _) game = game { p1Position = (xP1 + 10,yP1 - 10) }
+handleKeys (EventKey (Char 's') _ _ _) game = game { p1Position = (xP1,yP1 - 10) }
   where
     (xP1,yP1) = p1Position game
 handleKeys (EventKey (Char 'j') _ _ _) game = game { p2Position = (xP2 - 10,yP2) }
@@ -42,9 +43,9 @@ handleKeys _ game = game
 
 checkEnd :: MyGame -> MyGame
 checkEnd game = 
-    if not(length (bulletsDownLoc game) == length [ (i,j) | (i,j) <- bulletsDownLoc game, playerCollision (p1Position game) (i,j) 15] && length (bulletsTopLoc game) == length [ (i,j) | (i,j) <- bulletsTopLoc game, playerCollision (p1Position game) (i,j) 15]) then
+    if not(length (bulletsDownLoc game) == length [ (i,j) | (i,j) <- bulletsDownLoc game, playerCollision (p1Position game) (i,j) 6] && length (bulletsTopLoc game) == length [ (i,j) | (i,j) <- bulletsTopLoc game, playerCollision (p1Position game) (i,j) 6]) then
       error "P2 WON"
-      else if not(length (bulletsDownLoc game) == length [ (i,j) | (i,j) <- bulletsDownLoc game, playerCollision (p2Position game) (i,j) 15] && length (bulletsTopLoc game) == length [ (i,j) | (i,j) <- bulletsTopLoc game, playerCollision (p2Position game) (i,j) 15]) then
+      else if not(length (bulletsDownLoc game) == length [ (i,j) | (i,j) <- bulletsDownLoc game, playerCollision (p2Position game) (i,j) 6] && length (bulletsTopLoc game) == length [ (i,j) | (i,j) <- bulletsTopLoc game, playerCollision (p2Position game) (i,j) 6]) then
         error "P1 WON"
           else game
 
@@ -62,9 +63,18 @@ wallCollision (x,y) radius = topCollision || bottomCollision
 
 bulletsDismiss :: MyGame -> MyGame
 bulletsDismiss game = game {
-    bulletsDownLoc = [(i,j) | (i, j) <- bulletsDownLoc game, not $ wallCollision (i,j) 15],
-    bulletsTopLoc = [(i,j) | (i, j) <- bulletsTopLoc game, not $ wallCollision (i,j) 15]
+    bulletsDownLoc = [(i,j) | (i, j) <- bulletsDownLoc game, not $ wallCollision (i,j) 6],
+    bulletsTopLoc = [(i,j) | (i, j) <- bulletsTopLoc game, not $ wallCollision (i,j) 6]
                            }
+
+generateBullets :: MyGame -> MyGame
+generateBullets game = if bulletsCount game == 80 then
+  game {
+    bulletsDownLoc = bulletsDownLoc game ++ [(fst (p1Position game), 193)],
+    bulletsTopLoc  = bulletsTopLoc game ++ [(fst (p2Position game), -193)],
+    bulletsCount = 0
+  }
+  else game { bulletsCount = bulletsCount game + 1 }
 
 render :: MyGame -> Picture
 render game = pictures [
@@ -74,8 +84,8 @@ render game = pictures [
     p2
                        ]
     where
-        bulletsDown = pictures [ uncurry translate (bullet) $ color ballColor $ circleSolid 15 | bullet <- bulletsDownLoc game ]
-        bulletsUp = pictures [ uncurry translate (bullet) $ color ballColor $ circleSolid 15 | bullet <- bulletsTopLoc game ]
+        bulletsDown = pictures [ uncurry translate (bullet) $ color ballColor $ circleSolid 6 | bullet <- bulletsDownLoc game ]
+        bulletsUp = pictures [ uncurry translate (bullet) $ color ballColor $ circleSolid 6 | bullet <- bulletsTopLoc game ]
         p1 = player (p1Position game) p1Color
         p2 = player (p2Position game) p2Color
 
@@ -91,11 +101,12 @@ player (x,y) c = translate x y $ color c $ rectangleSolid 20 10
 
 initialState :: MyGame
 initialState = Game
-  { bulletsDownLoc = [(-40, 180), (30, 180)]
-  , bulletsTopLoc = [(-40, -180), (30, -180)]
-  , bulletsVel  = 10
-  , p1Position = (0, -200)
-  , p2Position = (0, 200)
+  { bulletsDownLoc = []
+  , bulletsTopLoc = []
+  , bulletsVel  = 60
+  , p1Position = (0, -150)
+  , p2Position = (0, 150)
+  , bulletsCount = 80
   }
 
 data MyGame = Game
@@ -104,6 +115,7 @@ data MyGame = Game
   , bulletsVel :: Float
   , p1Position :: (Float, Float)
   , p2Position :: (Float, Float)
+  , bulletsCount :: Int
   } deriving Show
 
 ballColor = dark red 
