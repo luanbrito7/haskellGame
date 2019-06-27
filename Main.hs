@@ -1,10 +1,21 @@
 import Graphics.Gloss
 import Graphics.Gloss.Data.ViewPort
+
 import Graphics.Gloss.Interface.Pure.Game
 import System.Random
 
 main :: IO ()
-main = play window background fps initialState render handleKeys update
+main = do
+  putStrLn "Digite uma dificuldade entre 1 e 3"
+  diff <- getLine
+  if diff == "1" then
+    play window background fps (initialState 60) render handleKeys update
+    else if diff == "2" then
+      play window background fps (initialState 90) render handleKeys update
+      else if diff == "3" then
+        play window background fps (initialState 120) render handleKeys update
+        else putStrLn "Insira um número válido!"
+
     where
         update :: Float -> MyGame -> MyGame
         update secs = generateBullets . checkEnd . bulletsDismiss . moveBullets secs
@@ -133,11 +144,11 @@ moveBullets sec state = state {
 player :: (Float, Float) -> Color -> Picture
 player (x,y) c = translate x y $ color c $ rectangleSolid 20 10
 
-initialState :: MyGame
-initialState = Game
+initialState :: Float -> MyGame
+initialState bulletsVel' = Game
   { bulletsDownLoc = []
   , bulletsTopLoc = []
-  , bulletsVel  = 60
+  , bulletsVel  = bulletsVel'
   , p1Position = (0, -100)
   , p2Position = (0, 100)
   , bulletsCount = 0
