@@ -15,32 +15,58 @@ fps :: Int
 fps = 60
 
 handleKeys :: Event -> MyGame -> MyGame
-handleKeys (EventKey (Char 'a') _ _ _) game = game { p1Position = (xP1 - 10,yP1) }
+handleKeys (EventKey (Char 'a') _ _ _) game = 
+  if xP1 < -200 then
+    game { p1Position = (200, yP1) }
+    else game { p1Position = (xP1 - 10, yP1) }
   where
     (xP1,yP1) = p1Position game
-handleKeys (EventKey (Char 'd') _ _ _) game = game { p1Position = (xP1 + 10,yP1) }
+handleKeys (EventKey (Char 'd') _ _ _) game = 
+  if xP1 > 200 then
+    game { p1Position = (-200, yP1) }
+    else game { p1Position = (xP1 + 10,yP1) }
   where
     (xP1,yP1) = p1Position game
-handleKeys (EventKey (Char 'w') _ _ _) game = game { p1Position = (xP1,yP1 + 10) }
+handleKeys (EventKey (Char 'w') _ _ _) game =
+  if yP1 < 0 then
+    game { p1Position = (xP1,yP1 + 10) }
+    else game { p1Position = (xP1, 0)}
   where
     (xP1,yP1) = p1Position game
-handleKeys (EventKey (Char 's') _ _ _) game = game { p1Position = (xP1,yP1 - 10) }
+handleKeys (EventKey (Char 's') _ _ _) game =
+  if yP1 > -200 then
+    game { p1Position = (xP1,yP1 - 10) }
+    else game { p1Position = (xP1, -200) }
   where
     (xP1,yP1) = p1Position game
 handleKeys (EventKey (Char 'q') _ _ _) game = game { bulletsTopLoc = bulletsTopLoc' ++ [(xP1, yP1 + 10)] }
   where
     (xP1,yP1) = p1Position game
     bulletsTopLoc' = bulletsTopLoc game
-handleKeys (EventKey (Char 'j') _ _ _) game = game { p2Position = (xP2 - 10,yP2) }
+handleKeys (EventKey (Char 'j') _ _ _) game =
+  if xP2 < -200 then
+    game { p2Position = (200, yP2) }
+    else 
+      game { p2Position = (xP2 - 10,yP2) }
   where
     (xP2,yP2) = p2Position game
-handleKeys (EventKey (Char 'l') _ _ _) game = game { p2Position = (xP2 + 10,yP2) }
+handleKeys (EventKey (Char 'l') _ _ _) game =
+  if xP2 < 200 then
+    game { p2Position = (xP2 + 10,yP2) }
+    else 
+      game { p2Position = (-200, yP2) }
   where
     (xP2,yP2) = p2Position game
-handleKeys (EventKey (Char 'i') _ _ _) game = game { p2Position = (xP2,yP2 + 10) }
+handleKeys (EventKey (Char 'i') _ _ _) game =
+  if yP2 < 200 then
+    game { p2Position = (xP2,yP2 + 10) }
+    else game { p2Position = (xP2,200) }
   where
     (xP2,yP2) = p2Position game
-handleKeys (EventKey (Char 'k') _ _ _) game = game { p2Position = (xP2,yP2 - 10) }
+handleKeys (EventKey (Char 'k') _ _ _) game =
+  if yP2 > 0 then
+    game { p2Position = (xP2,yP2 - 10) }
+    else game { p2Position = (xP2, 0) }
   where
     (xP2,yP2) = p2Position game
 handleKeys (EventKey (Char 'u') _ _ _) game = game { bulletsDownLoc = bulletsDownLoc' ++ [(xP2, yP2 - 10)] }
@@ -66,8 +92,8 @@ playerCollision (px, py) (bx, by) radius = collision
 wallCollision :: (Float, Float) -> Float -> Bool
 wallCollision (x,y) radius = topCollision || bottomCollision
   where
-    topCollision = y - radius <= -fromIntegral 200
-    bottomCollision = y + radius >= fromIntegral 200
+    topCollision = y - radius <= -fromIntegral 206
+    bottomCollision = y + radius >= fromIntegral 206
 
 bulletsDismiss :: MyGame -> MyGame
 bulletsDismiss game = game {
@@ -78,8 +104,8 @@ bulletsDismiss game = game {
 generateBullets :: MyGame -> MyGame
 generateBullets game = if bulletsCount game == 80 then
   game {
-    bulletsDownLoc = bulletsDownLoc game ++ [(fst (p1Position game), 193)],
-    bulletsTopLoc  = bulletsTopLoc game ++ [(fst (p2Position game), -193)],
+    bulletsDownLoc = bulletsDownLoc game ++ [(fst (p1Position game), 200)],
+    bulletsTopLoc  = bulletsTopLoc game ++ [(fst (p2Position game), -200)],
     bulletsCount = 0
   }
   else game { bulletsCount = bulletsCount game + 1 }
@@ -112,9 +138,9 @@ initialState = Game
   { bulletsDownLoc = []
   , bulletsTopLoc = []
   , bulletsVel  = 60
-  , p1Position = (0, -150)
-  , p2Position = (0, 150)
-  , bulletsCount = 80
+  , p1Position = (0, -100)
+  , p2Position = (0, 100)
+  , bulletsCount = 0
   }
 
 data MyGame = Game
